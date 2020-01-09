@@ -22,8 +22,8 @@ class GameManager {
     currentSpeed = 0
     nextMove = 0
     moistness = 0
-    snowPos = -5000
-    stomach = 3000
+    snowPos = -10000
+    stomach = 3750
     inventory = {
         wood: 0,
         stone: 0,
