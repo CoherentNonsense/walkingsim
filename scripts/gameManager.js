@@ -59,6 +59,7 @@ class GameManager {
         if (input.left) isMoving = true
 
         if (this.nextMove < Date.now() && isMoving) {
+            // stores input in case user lets go before the next frame(makes the movement more snappy)
             if(input.up) this._state.player.position.y--
             if(input.right) this._state.player.position.x++
             if(input.down) this._state.player.position.y++
@@ -69,8 +70,11 @@ class GameManager {
 
             const currentTile = this._state.tileMap.centerPosValue
 
-            // instant checks
+            // instant checks ( check current tile and create effect if needed )
+            // 2 = water tile
             if (currentTile == 2) {
+                // if you dont have a boat, you get wet
+                // if you have a fishing pole, you get a chance at fish
                 if (!this.inventory.boat) {
                     this.currentSpeed = this.waterSpeed
                     if (this.moistness <= 100) {
@@ -85,9 +89,15 @@ class GameManager {
                     this.stomach += 100
                     messageBoard.newMessage('', `You caught a fish. (food +200s total: ${this.stomach})`)
                 }
+                // 1 = gruond
+                // nothing happens
             } else if (currentTile == 1) {
                 this.currentSpeed = this.groundSpeed
+                // 3 = tree
+                // random chance at getting items
             } else if (currentTile == 3) {
+                // the lower the random chance the more chance you have at getting something
+                // once you have an axe the random chance is dropped
                 let randomChance
                 if (this.inventory.axe) {
                     randomChance = 6
@@ -107,6 +117,8 @@ class GameManager {
                     this.inventory.leaves += 1
                     messageBoard.newMessage('', 'You pulled off some leaves. (leaves +1)')
                 }
+                // 4 = stone
+                // chance to get stone
             } else if (currentTile == 4) {
                 if (Math.random() > 0.9) {
                     this.inventory.stone += 1
@@ -114,6 +126,8 @@ class GameManager {
                 }
             }
 
+            // moving logic
+            // if you have shoes move quickly
             if (this.inventory.shoes && currentTile == 1) {
                 this.currentSpeed = this.shoeSpeed
             }
@@ -121,6 +135,7 @@ class GameManager {
         }
 
         // moisly
+        // water makes you wet, every frame youre out of water you get drier
         if (this.moistness > 0) {
             this.moistness --
 
@@ -132,6 +147,7 @@ class GameManager {
         }
 
         // hungry guy
+        // every frame you lose hunger
         this.stomach--
         if (this.stomach == 1250) {
             messageBoard.newMessage('admin', 'You are a little peckish.')
@@ -144,12 +160,15 @@ class GameManager {
         }
 
         // idot plaer
+        // if the player goes too far north instead of south
         if (this._state.player.position.y == -50 && !this.gavehint) {
             this.gavehint = true
             messageBoard.newMessage('admin', 'Hint: South is down.')
         }
 
         // craft
+        // every frame check if player has enough materials to craft things
+        // if they do, craft it
         if (!this.inventory.axe && this.inventory.stone >= 6 && this.inventory.wood >= 6) {
             this.inventory.axe = true
             this.inventory.stone -= 6
@@ -170,6 +189,8 @@ class GameManager {
         }
 
         // big cold
+        // every frame move the snow closer to player
+        // if its too close player loses
         this.snowPos++
         let snowDist = this._state.player.position.y - this.snowPos
         if (snowDist == 3500) {
