@@ -8,6 +8,7 @@ class GameEngine {
     _timeOverflow = 0
     _timeBetweenFrames = 33
 
+    // is called when the start button is pushed
     start() {
         window.addEventListener('keydown', e => input.onKeypress(e))
         window.addEventListener('keyup', e => input.onKeypress(e))
@@ -19,17 +20,7 @@ class GameEngine {
         })
     }
 
-    stop() {
-        cancelAnimationFrame(this._animationReq)
-    }
-    resume() {
-        this._animationReq = requestAnimationFrame(timestamp => {
-            this._lastTime = timestamp
-            game.start()
-            this._loop(timestamp)
-        })
-    }
-
+    // the game loop (is called every frame recursively)
     _loop(timestamp) {
         let updated = false
         // time config
@@ -37,13 +28,13 @@ class GameEngine {
         this._lastTime = timestamp
         this._timeOverflow += offset
 
-        // application logic
+        // runs the game manager update function at a consistent rate
         while (this._timeOverflow > this._timeBetweenFrames) {
             this._timeOverflow -= this._timeBetweenFrames
             updated = true
             game.update(input.input)
         }
-        // render logic
+        // runs the view render function everytime the game manager is updated
         if (updated) {
             view.render(game._state)
         }
